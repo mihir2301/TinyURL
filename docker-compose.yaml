@@ -1,0 +1,21 @@
+services:
+  api:
+    build: api
+    ports:
+      - "9000:9000"
+    environment:
+      DB_ADDRRESS: "db:6379" 
+      DOMAIN: "localhost:9000"
+      DB_PASSWORD: ""
+      API_QUOTA: "10"
+      APP_PORT: ":9000"
+    depends_on:
+      - db
+  
+  db:
+    build: database
+    ports:
+      - "6379:6379"
+    volumes:
+      - .data:/data
+
