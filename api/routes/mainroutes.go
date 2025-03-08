@@ -1,7 +1,10 @@
 package routes
 
 import (
+	"log"
 	"net/http"
+	"os"
+	"tinyurl/auth"
 
 	"github.com/gin-gonic/gin"
 )
@@ -62,10 +65,10 @@ func (r *Routes) WebsiteHealthChecker(rg *gin.RouterGroup) {
 	}
 }
 
-func (r *Routes) ShortnerEmailAndOtpVerification(rg *gin.RouterGroup) {
+func (r *Routes) USER(rg *gin.RouterGroup) {
 	group := rg.Group("/urlshortner")
 	group.Use(CORSMiddleware())
-	for _, value := range Verification {
+	for _, value := range User {
 		switch value.method {
 		case "GET":
 			group.GET(value.pattern, value.handlefunc)
@@ -83,4 +86,39 @@ func (r *Routes) ShortnerEmailAndOtpVerification(rg *gin.RouterGroup) {
 			})
 		}
 	}
+}
+
+func (r *Routes) URLShortner(rg *gin.RouterGroup) {
+	group := rg.Group("/urlshortner")
+	group.Use(CORSMiddleware())
+	for _, value := range Shortner {
+		switch value.method {
+		case "GET":
+			group.GET(value.pattern, value.handlefunc)
+		case "POST":
+			group.POST(value.pattern, value.handlefunc)
+		case "OPTIONS":
+			group.OPTIONS(value.pattern, value.handlefunc)
+		case "PUT":
+			group.PUT(value.pattern, value.handlefunc)
+		case "DELETE":
+			group.DELETE(value.pattern, value.handlefunc)
+		default:
+			group.GET(value.pattern, func(c *gin.Context) {
+				c.JSON(http.StatusOK, gin.H{"message": "please enter correct method"})
+			})
+		}
+	}
+}
+
+func Client() {
+	routes := Routes{
+		r: gin.Default(),
+	}
+	rg := routes.r.Group("/api/v1")
+	routes.WebsiteHealthChecker(rg)
+	routes.USER(rg)
+	rg.Use(auth.Auth())
+	routes.URLShortner(rg)
+	log.Fatal(routes.r.Run(os.Getenv("APP_PORT")))
 }

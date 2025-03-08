@@ -6,6 +6,10 @@ const (
 	VerifyEmail = "/verify-email"
 	VerifyOtp   = "/verify-otp"
 	ResendOTP   = "/resend"
+	Login       = "/login"
+	Register    = "/register"
+	Shortner    = "/shorten"
+	DirectUrl   = "/direct/:url"
 )
 
 //Sendgrid

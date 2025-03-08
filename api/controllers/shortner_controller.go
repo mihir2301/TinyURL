@@ -1,4 +1,4 @@
-package routes
+package controllers
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func geturl(c *gin.Context) {
+func Shorten(c *gin.Context) {
 	var req models.Request
 	err := c.BindJSON(&req)
 	if err != nil {
@@ -104,4 +104,19 @@ func geturl(c *gin.Context) {
 	resp.URL = req.Url
 
 	c.JSON(http.StatusOK, gin.H{"Data is": resp})
+}
+
+func DirectUrl(c *gin.Context) {
+	param := c.Param("url")
+	r2 := database.RedisClient(1)
+	defer r2.Close()
+	val, err := r2.Get(context.Background(), param).Result()
+	if err == redis.Nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "No url present"})
+		return
+	} else if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "error in connecting the client"})
+		return
+	}
+	c.Redirect(301, val)
 }
